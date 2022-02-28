@@ -4,6 +4,7 @@ const URL = `https://sens.apigw.ntruss.com/sms/v2/services/${NCP_SERVICE_ID}/mes
 
 const RESPONSE = Object.freeze({
   SUCCESS: "success",
+  FAIL: "fail",
   EXISTED_PHONE_NUMBER: "이미 존재하는 번호입니다.",
 });
 
