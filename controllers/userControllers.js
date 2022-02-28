@@ -1,5 +1,6 @@
 const axios = require("axios");
 const redis = require("redis");
+const bcrypt = require("bcrypt");
 
 const User = require("../models/User");
 const { date, signature } = require("../utils/smsHeader");
@@ -24,10 +25,12 @@ const postCertification = async (req, res, next) => {
     const existedUser = await User.findOne({ phoneNumber });
 
     if (existedUser) {
-      return res.json({
+      res.json({
         status: 400,
         result: RESPONSE.EXISTED_PHONE_NUMBER,
       });
+
+      return;
     }
 
     await axios({
@@ -75,10 +78,12 @@ const postVerification = async (req, res, next) => {
     const certificationCode = await client.get(phoneNumber);
 
     if (code === certificationCode) {
-      return res.json({
+      res.json({
         status: 201,
         result: RESPONSE.SUCCESS,
       });
+
+      return;
     }
 
     res.json({
@@ -95,5 +100,55 @@ const postVerification = async (req, res, next) => {
   }
 };
 
+const postSignUp = async (req, res, next) => {
+  const { email, password, phoneNumber, nickname } = req.body;
+  const { SALT } = process.env;
+
+  try {
+    const existedEmail = await User.findOne({ email });
+    const existedNickname = await User.findOne({ nickname });
+
+    if (existedEmail) {
+      res.json({
+        status: 400,
+        result: RESPONSE.EXISTED_EMAIL,
+      });
+
+      return;
+    }
+
+    if (existedNickname) {
+      res.json({
+        status: 400,
+        result: RESPONSE.EXISTED_NICKNAME,
+      });
+
+      return;
+    }
+
+    const encryptedPassword = bcrypt.hashSync(password, Number(SALT));
+
+    await User.create({
+      email,
+      phoneNumber,
+      nickname,
+      password: encryptedPassword,
+    });
+
+    res.json({
+      status: 201,
+      result: RESPONSE.SUCCESS,
+    });
+  } catch {
+    res.json({
+      error: {
+        status: 500,
+        message: ERROR_RESPONSE.SERVER_ERROR,
+      },
+    });
+  }
+};
+
 exports.postCertification = postCertification;
 exports.postVerification = postVerification;
+exports.postSignUp = postSignUp;
