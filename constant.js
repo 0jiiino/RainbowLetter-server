@@ -2,7 +2,7 @@ const URL = `https://sens.apigw.ntruss.com/sms/v2/services/${process.env.NCP_SER
 
 const RESPONSE = Object.freeze({
   SUCCESS: "success",
-  FAIL: "fail",
+  FAIL: "인증에 실패하였습니다.",
   EXISTED_PHONE_NUMBER: "이미 존재하는 번호입니다.",
   EXISTED_EMAIL: "이미 존재하는 이메일입니다.",
   EXISTED_NICKNAME: "이미 존재하는 별명입니다.",
