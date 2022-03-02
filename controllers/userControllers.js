@@ -3,8 +3,10 @@ const redis = require("redis");
 const bcrypt = require("bcrypt");
 
 const User = require("../models/User");
+const Angel = require("../models/Angel");
 const { date, signature } = require("../utils/smsHeader");
 const { RESPONSE, ERROR_RESPONSE, URL } = require("../constant");
+const generateToken = require("../utils/tokenGenerator");
 
 const client = redis.createClient();
 
@@ -149,6 +151,77 @@ const postSignUp = async (req, res, next) => {
   }
 };
 
+const postLogin = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email }).populate("angels").lean();
+
+    if (!user) {
+      res.json({
+        status: 400,
+        result: RESPONSE.NOT_EXISTED_USER,
+      });
+
+      return;
+    }
+
+    const isMatchedPassword = await bcrypt.compare(password, user.password);
+
+    if (!isMatchedPassword) {
+      res.json({
+        status: 400,
+        result: RESPONSE.NOT_MATCH_PASSWORD,
+      });
+
+      return;
+    }
+
+    const accessToken = generateToken(email);
+    const { _id: id, nickname, angels } = user;
+
+    if (!angels.length) {
+      res.json({
+        user: {
+          id,
+          nickname,
+        },
+        accessToken,
+      });
+
+      return;
+    }
+
+    const angel = {};
+
+    for (let i = 0; i < angels.length; i++) {
+      if (angels[i].activation) {
+        angel.id = angels[i]._id;
+        angel.name = angels[i].name;
+
+        break;
+      }
+    }
+
+    res.json({
+      user: {
+        id,
+        nickname,
+        angel,
+      },
+      accessToken,
+    });
+  } catch {
+    res.json({
+      error: {
+        status: 500,
+        message: ERROR_RESPONSE.SERVER_ERROR,
+      },
+    });
+  }
+};
+
 exports.postCertification = postCertification;
 exports.postVerification = postVerification;
 exports.postSignUp = postSignUp;
+exports.postLogin = postLogin;

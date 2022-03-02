@@ -19,7 +19,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  angel: {
+  angels: {
     type: [
       {
         type: mongoose.Types.ObjectId,
