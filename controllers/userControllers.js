@@ -2,11 +2,11 @@ const axios = require("axios");
 const redis = require("redis");
 const bcrypt = require("bcrypt");
 
+require("../models/Angel");
 const User = require("../models/User");
-const Angel = require("../models/Angel");
+const generateToken = require("../utils/tokenGenerator");
 const { date, signature } = require("../utils/smsHeader");
 const { RESPONSE, ERROR_RESPONSE, URL } = require("../constant");
-const generateToken = require("../utils/tokenGenerator");
 
 const client = redis.createClient();
 

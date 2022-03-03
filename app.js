@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
 
 const user = require("./routes/user");
+const angel = require("./routes/angel");
 
 const app = express();
 
@@ -19,5 +20,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/users", user);
+app.use("/angels", angel);
 
 module.exports = app;
