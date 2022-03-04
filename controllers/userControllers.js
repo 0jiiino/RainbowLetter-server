@@ -230,8 +230,6 @@ const patchAngel = async (req, res, next) => {
     const angel = await Angel.findById(id).populate("letters");
     const { letters } = angel;
 
-    angel.activation = activation;
-
     for (let i = 0; i < letters.length; i++) {
       if (letters[i].echo) {
         letters.echo = false;
@@ -239,6 +237,8 @@ const patchAngel = async (req, res, next) => {
         await letters[i].save();
       }
     }
+
+    angel.activation = activation;
 
     await angel.save();
 
