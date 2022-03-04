@@ -1,3 +1,4 @@
+require("../models/Letter");
 const Angel = require("../models/Angel");
 const User = require("../models/User");
 const { ERROR_RESPONSE } = require("../constant");
@@ -29,4 +30,25 @@ const postAngel = async (req, res, next) => {
   }
 };
 
+const getAngelLetters = async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    const { letters } = await Angel.findById(id).populate("letters").lean();
+
+    res.json({
+      status: 200,
+      letters,
+    });
+  } catch {
+    res.json({
+      error: {
+        status: 500,
+        message: ERROR_RESPONSE.SERVER_ERROR,
+      },
+    });
+  }
+};
+
 exports.postAngel = postAngel;
+exports.getAngelLetters = getAngelLetters;
