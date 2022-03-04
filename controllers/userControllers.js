@@ -2,11 +2,12 @@ const axios = require("axios");
 const redis = require("redis");
 const bcrypt = require("bcrypt");
 
-require("../models/Angel");
+const Angel = require("../models/Angel");
 const User = require("../models/User");
 const generateToken = require("../utils/tokenGenerator");
 const { date, signature } = require("../utils/smsHeader");
 const { RESPONSE, ERROR_RESPONSE, URL } = require("../constant");
+const { response } = require("express");
 
 const client = redis.createClient();
 
@@ -221,7 +222,42 @@ const postLogin = async (req, res, next) => {
   }
 };
 
+const patchAngel = async (req, res, next) => {
+  const { id } = req.params;
+  const { activation } = req.body;
+
+  try {
+    const angel = await Angel.findById(id).populate("letters");
+    const { letters } = angel;
+
+    angel.activation = activation;
+
+    for (let i = 0; i < letters.length; i++) {
+      if (letters[i].echo) {
+        letters.echo = false;
+
+        await letters[i].save();
+      }
+    }
+
+    await angel.save();
+
+    response.json({
+      status: 201,
+      result: "success",
+    });
+  } catch {
+    res.json({
+      error: {
+        status: 500,
+        message: ERROR_RESPONSE.SERVER_ERROR,
+      },
+    });
+  }
+};
+
 exports.postCertification = postCertification;
 exports.postVerification = postVerification;
 exports.postSignUp = postSignUp;
 exports.postLogin = postLogin;
+exports.patchAngel = patchAngel;
