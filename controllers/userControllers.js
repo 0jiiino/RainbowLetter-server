@@ -24,7 +24,7 @@ const postCertification = async (req, res, next) => {
   client.expire(phoneNumber, 3600);
 
   try {
-    const existedUser = await User.findOne({ phoneNumber });
+    const existedUser = await User.findOne({ phoneNumber }).lean();
 
     if (existedUser) {
       res.json({
@@ -77,7 +77,7 @@ const postVerification = async (req, res, next) => {
   const { phoneNumber, code } = req.body;
 
   try {
-    const certificationCode = await client.get(phoneNumber);
+    const certificationCode = await client.get(phoneNumber).lean();
 
     if (code === certificationCode) {
       res.json({
@@ -107,8 +107,8 @@ const postSignUp = async (req, res, next) => {
   const { SALT } = process.env;
 
   try {
-    const existedEmail = await User.findOne({ email });
-    const existedNickname = await User.findOne({ nickname });
+    const existedEmail = await User.findOne({ email }).lean();
+    const existedNickname = await User.findOne({ nickname }).lean();
 
     if (existedEmail) {
       res.json({
