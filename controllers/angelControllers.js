@@ -50,5 +50,40 @@ const getAngelLetters = async (req, res, next) => {
   }
 };
 
+const patchAngel = async (req, res, next) => {
+  const { id } = req.params;
+  const { activation } = req.body;
+
+  try {
+    const angel = await Angel.findById(id).populate("letters");
+    const { letters } = angel;
+
+    for (let i = 0; i < letters.length; i++) {
+      if (letters[i].echo) {
+        letters.echo = false;
+
+        await letters[i].save();
+      }
+    }
+
+    angel.activation = activation;
+
+    await angel.save();
+
+    res.json({
+      status: 201,
+      result: "success",
+    });
+  } catch {
+    res.json({
+      error: {
+        status: 500,
+        message: ERROR_RESPONSE.SERVER_ERROR,
+      },
+    });
+  }
+};
+
 exports.postAngel = postAngel;
 exports.getAngelLetters = getAngelLetters;
+exports.patchAngel = patchAngel;

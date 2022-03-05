@@ -222,42 +222,7 @@ const postLogin = async (req, res, next) => {
   }
 };
 
-const patchAngel = async (req, res, next) => {
-  const { id } = req.params;
-  const { activation } = req.body;
-
-  try {
-    const angel = await Angel.findById(id).populate("letters");
-    const { letters } = angel;
-
-    for (let i = 0; i < letters.length; i++) {
-      if (letters[i].echo) {
-        letters.echo = false;
-
-        await letters[i].save();
-      }
-    }
-
-    angel.activation = activation;
-
-    await angel.save();
-
-    response.json({
-      status: 201,
-      result: "success",
-    });
-  } catch {
-    res.json({
-      error: {
-        status: 500,
-        message: ERROR_RESPONSE.SERVER_ERROR,
-      },
-    });
-  }
-};
-
 exports.postCertification = postCertification;
 exports.postVerification = postVerification;
 exports.postSignUp = postSignUp;
 exports.postLogin = postLogin;
-exports.patchAngel = patchAngel;
