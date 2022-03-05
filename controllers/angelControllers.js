@@ -101,7 +101,7 @@ const postLetter = async (req, res, next) => {
     await angel.save();
 
     res.json({
-      statue: 201,
+      status: 201,
       letter: newLetter,
     });
   } catch {
