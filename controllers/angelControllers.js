@@ -1,4 +1,4 @@
-require("../models/Letter");
+const Letter = require("../models/Letter");
 const Angel = require("../models/Angel");
 const User = require("../models/User");
 const { ERROR_RESPONSE } = require("../constant");
@@ -84,6 +84,37 @@ const patchAngel = async (req, res, next) => {
   }
 };
 
+const postLetter = async (req, res, next) => {
+  const { nickname, id, title, content } = req.body;
+
+  try {
+    const newLetter = await Letter.create({
+      creator: nickname,
+      createdAt: new Date(),
+      title,
+      content,
+    });
+
+    const angel = await Angel.findById(id);
+    angel.letters.push(newLetter._id);
+
+    await angel.save();
+
+    res.json({
+      statue: 201,
+      letter: newLetter,
+    });
+  } catch {
+    res.json({
+      error: {
+        status: 500,
+        message: ERROR_RESPONSE.SERVER_ERROR,
+      },
+    });
+  }
+};
+
 exports.postAngel = postAngel;
 exports.getAngelLetters = getAngelLetters;
 exports.patchAngel = patchAngel;
+exports.postLetter = postLetter;
