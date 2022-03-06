@@ -1,7 +1,7 @@
 const Letter = require("../models/Letter");
 const Angel = require("../models/Angel");
 const User = require("../models/User");
-const { ERROR_RESPONSE } = require("../constant");
+const { ERROR_RESPONSE, RESPONSE } = require("../constant");
 
 const postAngel = async (req, res, next) => {
   const { id: userId, name } = req.body;
@@ -72,7 +72,7 @@ const patchAngel = async (req, res, next) => {
 
     res.json({
       status: 201,
-      result: "success",
+      result: RESPONSE.SUCCESS,
     });
   } catch {
     res.json({

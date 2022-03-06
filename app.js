@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 
 const user = require("./routes/user");
 const angel = require("./routes/angel");
+const letter = require("./routes/letter");
 
 const app = express();
 
@@ -21,5 +22,6 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/users", user);
 app.use("/angels", angel);
+app.use("/letters", letter);
 
 module.exports = app;
