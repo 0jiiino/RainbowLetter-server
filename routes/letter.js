@@ -1,9 +1,10 @@
 const express = require("express");
-const { patchEcho } = require("../controllers/letterControllers");
+const { patchEcho, getLetters } = require("../controllers/letterControllers");
 const validateToken = require("../middlewares/tokenValidation");
 
 const router = express.Router();
 
-router.patch("/:id/echos", patchEcho);
+router.get("/", validateToken, getLetters);
+router.patch("/:id/echos", validateToken, patchEcho);
 
 module.exports = router;
