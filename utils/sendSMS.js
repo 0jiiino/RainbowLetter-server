@@ -22,7 +22,7 @@ const sendSMS = async ({ info }) => {
       contentType: "COMM",
       countryCode: "82",
       from: CALLER_ID,
-      content: message,
+      content: `[무지개편지]\n${message}`,
       messages: [
         {
           to: `${phoneNumber}`,
