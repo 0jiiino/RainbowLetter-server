@@ -58,7 +58,7 @@ const postVerification = async (req, res, next) => {
   const { phoneNumber, code } = req.body;
 
   try {
-    const certificationCode = await client.get(phoneNumber).lean();
+    const certificationCode = await client.get(phoneNumber);
 
     if (code === certificationCode) {
       res.json({

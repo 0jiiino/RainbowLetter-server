@@ -3,7 +3,7 @@ const axios = require("axios");
 const { date, signature } = require("./smsHeader");
 const { URL } = require("../constant");
 
-const sendSMS = async ({ info }) => {
+const sendSMS = async (info) => {
   const { message, phoneNumber } = info;
   const { NCP_ACCESS_KEY, CALLER_ID } = process.env;
 
