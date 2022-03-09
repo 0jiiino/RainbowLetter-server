@@ -114,7 +114,41 @@ const postLetter = async (req, res, next) => {
   }
 };
 
+const getAngels = async (req, res, next) => {
+  const { id } = req.params;
+  const inactiveAngels = [];
+
+  try {
+    const { angels } = await User.findById(id)
+      .populate({
+        path: "angels",
+      })
+      .lean()
+      .exec();
+
+    for (let i = 0; i < angels.length; i++) {
+      if (!angels[i].activation) {
+        const angelInfo = { name: angels[i].name, id: angels[i]._id };
+
+        inactiveAngels.push(angelInfo);
+      }
+    }
+
+    res.json({
+      mailboxAngels: inactiveAngels,
+    });
+  } catch {
+    res.json({
+      error: {
+        status: 500,
+        message: ERROR_RESPONSE.SERVER_ERROR,
+      },
+    });
+  }
+};
+
 exports.postAngel = postAngel;
 exports.getAngelLetters = getAngelLetters;
 exports.patchAngel = patchAngel;
 exports.postLetter = postLetter;
+exports.getAngels = getAngels;
