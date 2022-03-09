@@ -147,8 +147,62 @@ const getAngels = async (req, res, next) => {
   }
 };
 
+const deleteAngel = async (req, res, next) => {
+  const { angelId, userId } = req.params;
+  const letterId = [];
+
+  try {
+    const { letters } = await Angel.findById(angelId)
+      .populate("letters")
+      .exec();
+
+    for (let i = 0; i < letters.length; i++) {
+      letterId.push(letters[i]._id);
+    }
+
+    const user = await User.findById(userId).populate("angels").exec();
+    const { angels } = user;
+
+    for (let i = 0; i < angels.length; i++) {
+      const id = angels[i]._id;
+      console.log(id.toString());
+
+      if (id.toString() === angelId) {
+        angels.splice(i, 1);
+
+        break;
+      }
+    }
+
+    await Promise.all([
+      Letter.deleteOne({ id: letterId[0] }),
+      Letter.deleteOne({ id: letterId[1] }),
+      Letter.deleteOne({ id: letterId[2] }),
+      Letter.deleteOne({ id: letterId[3] }),
+      Letter.deleteOne({ id: letterId[4] }),
+      Letter.deleteOne({ id: letterId[5] }),
+      Letter.deleteOne({ id: letterId[6] }),
+      Angel.deleteOne({ id: angelId }),
+      user.save(),
+    ]);
+
+    res.json({
+      status: 200,
+      result: RESPONSE.SUCCESS,
+    });
+  } catch {
+    res.json({
+      error: {
+        status: 500,
+        message: ERROR_RESPONSE.SERVER_ERROR,
+      },
+    });
+  }
+};
+
 exports.postAngel = postAngel;
 exports.getAngelLetters = getAngelLetters;
 exports.patchAngel = patchAngel;
 exports.postLetter = postLetter;
 exports.getAngels = getAngels;
+exports.deleteAngel = deleteAngel;

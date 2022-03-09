@@ -6,6 +6,7 @@ const {
   patchAngel,
   postLetter,
   getAngels,
+  deleteAngel,
 } = require("../controllers/angelControllers");
 const validateToken = require("../middlewares/tokenValidation");
 
@@ -16,5 +17,6 @@ router.get("/:id", validateToken, getAngelLetters);
 router.patch("/:id", validateToken, patchAngel);
 router.post("/letters", validateToken, postLetter);
 router.get("/users/:id", validateToken, getAngels);
+router.delete("/:angelId/users/:userId", validateToken, deleteAngel);
 
 module.exports = router;
