@@ -60,7 +60,7 @@ const patchAngel = async (req, res, next) => {
 
     for (let i = 0; i < letters.length; i++) {
       if (letters[i].echo) {
-        letters.echo = false;
+        letters[i].echo = false;
 
         await letters[i].save();
       }
@@ -200,9 +200,30 @@ const deleteAngel = async (req, res, next) => {
   }
 };
 
+const getMailboxLetters = async (req, res, next) => {
+  const { id } = req.params;
+
+  try {
+    const { letters } = await Angel.findById(id).populate("letters").exec();
+
+    res.json({
+      status: 200,
+      letters,
+    });
+  } catch {
+    res.json({
+      error: {
+        status: 500,
+        message: ERROR_RESPONSE.SERVER_ERROR,
+      },
+    });
+  }
+};
+
 exports.postAngel = postAngel;
 exports.getAngelLetters = getAngelLetters;
 exports.patchAngel = patchAngel;
 exports.postLetter = postLetter;
 exports.getAngels = getAngels;
 exports.deleteAngel = deleteAngel;
+exports.getMailboxLetters = getMailboxLetters;
