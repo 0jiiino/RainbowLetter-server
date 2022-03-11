@@ -1,16 +1,14 @@
-const axios = require("axios");
-
 const Letter = require("../models/Letter");
 const User = require("../models/User");
-const { ERROR_RESPONSE, RESPONSE, URL } = require("../constant");
-const { date, signature } = require("../utils/smsHeader");
 const sendSMS = require("../utils/sendSMS");
+const { ERROR_RESPONSE, RESPONSE } = require("../constant");
 
 const getLetters = async (req, res, next) => {
   try {
     const letters = await Letter.find({ echo: true })
       .sort([["createdAt", -1]])
-      .lean();
+      .lean()
+      .exec();
 
     res.json({
       status: 200,
@@ -31,7 +29,7 @@ const patchEcho = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const letter = await Letter.findById(id);
+    const letter = await Letter.findById(id).exec();
 
     letter.echo = echo;
     letter.createdAt = Date.now();
@@ -57,8 +55,10 @@ const putReply = async (req, res, next) => {
   const { content } = req.body;
 
   try {
-    const { creator } = await Letter.findById(id).lean();
-    const { phoneNumber } = await User.findOne({ nickname: creator }).lean();
+    const { creator } = await Letter.findById(id).lean().exec();
+    const { phoneNumber } = await User.findOne({ nickname: creator })
+      .lean()
+      .exec();
 
     const info = { message: content, phoneNumber };
 

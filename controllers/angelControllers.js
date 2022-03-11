@@ -8,7 +8,7 @@ const postAngel = async (req, res, next) => {
 
   try {
     const { _id: id } = await Angel.create({ name });
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).exec();
 
     user.angels.push(id);
     await user.save();
@@ -34,7 +34,10 @@ const getAngelLetters = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const { letters } = await Angel.findById(id).populate("letters").lean();
+    const { letters } = await Angel.findById(id)
+      .populate("letters")
+      .lean()
+      .exec();
 
     res.json({
       status: 200,
@@ -55,7 +58,7 @@ const patchAngel = async (req, res, next) => {
   const { activation } = req.body;
 
   try {
-    const angel = await Angel.findById(id).populate("letters");
+    const angel = await Angel.findById(id).populate("letters").exec();
     const { letters } = angel;
 
     for (let i = 0; i < letters.length; i++) {
@@ -95,7 +98,7 @@ const postLetter = async (req, res, next) => {
       content,
     });
 
-    const angel = await Angel.findById(id);
+    const angel = await Angel.findById(id).exec();
     angel.letters.push(newLetter._id);
 
     await angel.save();
@@ -154,6 +157,7 @@ const deleteAngel = async (req, res, next) => {
   try {
     const { letters } = await Angel.findById(angelId)
       .populate("letters")
+      .lean()
       .exec();
 
     for (let i = 0; i < letters.length; i++) {
@@ -204,7 +208,10 @@ const getMailboxLetters = async (req, res, next) => {
   const { id } = req.params;
 
   try {
-    const { letters } = await Angel.findById(id).populate("letters").exec();
+    const { letters } = await Angel.findById(id)
+      .populate("letters")
+      .lean()
+      .exec();
 
     res.json({
       status: 200,

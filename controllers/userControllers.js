@@ -8,7 +8,6 @@ const sendSMS = require("../utils/sendSMS");
 const { RESPONSE, ERROR_RESPONSE } = require("../constant");
 
 const client = redis.createClient();
-
 client.connect();
 
 const postCertification = async (req, res, next) => {
@@ -22,7 +21,7 @@ const postCertification = async (req, res, next) => {
   client.expire(phoneNumber, 3600);
 
   try {
-    const existedUser = await User.findOne({ phoneNumber }).lean();
+    const existedUser = await User.findOne({ phoneNumber }).lean().exec();
 
     if (existedUser) {
       res.json({
@@ -88,8 +87,8 @@ const postSignUp = async (req, res, next) => {
   const { SALT } = process.env;
 
   try {
-    const existedEmail = await User.findOne({ email }).lean();
-    const existedNickname = await User.findOne({ nickname }).lean();
+    const existedEmail = await User.findOne({ email }).lean().exec();
+    const existedNickname = await User.findOne({ nickname }).lean().exec();
 
     if (existedEmail) {
       res.json({
@@ -136,7 +135,7 @@ const postLogin = async (req, res, next) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email }).populate("angels").lean();
+    const user = await User.findOne({ email }).populate("angels").lean().exec();
 
     if (!user) {
       res.json({

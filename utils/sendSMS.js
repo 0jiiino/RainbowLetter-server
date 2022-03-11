@@ -1,7 +1,7 @@
 const axios = require("axios");
 
-const { date, signature } = require("./smsHeader");
 const { URL } = require("../constant");
+const { date, signature } = require("./smsHeader");
 
 const sendSMS = async (info) => {
   const { message, phoneNumber } = info;
