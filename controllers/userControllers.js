@@ -201,28 +201,7 @@ const postLogin = async (req, res, next) => {
   }
 };
 
-const deleteUser = async (req, res, next) => {
-  const { id } = req.params;
-
-  try {
-    await User.deleteOne({ _id: id });
-
-    res.json({
-      status: 200,
-      result: RESPONSE.SUCCESS,
-    });
-  } catch {
-    res.json({
-      error: {
-        status: 500,
-        message: ERROR_RESPONSE.SERVER_ERROR,
-      },
-    });
-  }
-};
-
 exports.postCertification = postCertification;
 exports.postVerification = postVerification;
 exports.postSignUp = postSignUp;
 exports.postLogin = postLogin;
-exports.deleteUser = deleteUser;
