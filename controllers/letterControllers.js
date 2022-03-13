@@ -62,7 +62,7 @@ const putReply = async (req, res, next) => {
 
     const info = { message: content, phoneNumber };
 
-    sendSMS({ info });
+    sendSMS(info);
 
     res.json({
       status: 200,
