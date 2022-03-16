@@ -1,5 +1,5 @@
-const redis = require("redis");
 const bcrypt = require("bcrypt");
+const cache = require("memory-cache");
 
 require("../models/Angel");
 const User = require("../models/User");
@@ -7,21 +7,14 @@ const generateToken = require("../utils/tokenGenerator");
 const sendSMS = require("../utils/sendSMS");
 const { RESPONSE, ERROR_RESPONSE } = require("../constant");
 
-const client = redis.createClient(
-  process.env.REDIS_URI,
-  process.env.REDIS_PORT
-);
-client.connect();
-
 const postCertification = async (req, res, next) => {
   const { phoneNumber } = req.body;
 
   const certificationCode =
     Math.floor(Math.random() * (999999 - 100000)) + 100000;
 
-  client.del(phoneNumber);
-  client.set(phoneNumber, certificationCode.toString());
-  client.expire(phoneNumber, 3600);
+  cache.del(phoneNumber);
+  cache.put(phoneNumber, certificationCode.toString(), 180000);
 
   try {
     const existedUser = await User.findOne({ phoneNumber }).lean().exec();
@@ -58,10 +51,9 @@ const postCertification = async (req, res, next) => {
 
 const postVerification = async (req, res, next) => {
   const { phoneNumber, code } = req.body;
+  const certificationCode = cache.get(phoneNumber);
 
   try {
-    const certificationCode = await client.get(phoneNumber);
-
     if (code === certificationCode) {
       res.json({
         status: 201,
