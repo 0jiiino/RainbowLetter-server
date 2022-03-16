@@ -7,7 +7,10 @@ const generateToken = require("../utils/tokenGenerator");
 const sendSMS = require("../utils/sendSMS");
 const { RESPONSE, ERROR_RESPONSE } = require("../constant");
 
-const client = redis.createClient();
+const client = redis.createClient(
+  process.env.REDIS_URI,
+  process.env.REDIS_PORT
+);
 client.connect();
 
 const postCertification = async (req, res, next) => {
