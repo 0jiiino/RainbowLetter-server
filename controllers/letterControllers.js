@@ -94,7 +94,7 @@ const putReply = async (req, res, next) => {
         "x-ncp-apigw-signature-v2": signature,
       },
       data: {
-        type: "SMS",
+        type: "LMS",
         contentType: "COMM",
         countryCode: "82",
         from: CALLER_ID,
