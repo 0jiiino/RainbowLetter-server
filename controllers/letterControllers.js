@@ -1,7 +1,9 @@
+const axios = require("axios");
+const cryptoJs = require("crypto-js");
+
 const Letter = require("../models/Letter");
 const User = require("../models/User");
-const sendSMS = require("../utils/sendSMS");
-const { ERROR_RESPONSE, RESPONSE } = require("../constant");
+const { ERROR_RESPONSE, RESPONSE, URL } = require("../constant");
 
 const getLetters = async (req, res, next) => {
   try {
@@ -53,6 +55,27 @@ const patchEcho = async (req, res, next) => {
 const putReply = async (req, res, next) => {
   const { id } = req.params;
   const { content } = req.body;
+  const { NCP_ACCESS_KEY, NCP_SECRET_KEY, NCP_SERVICE_ID, CALLER_ID } =
+    process.env;
+
+  const date = Date.now().toString();
+  const method = "POST";
+  const space = " ";
+  const newLine = "\n";
+  const url2 = `/sms/v2/services/${NCP_SERVICE_ID}/messages`;
+
+  const hmac = cryptoJs.algo.HMAC.create(cryptoJs.algo.SHA256, NCP_SECRET_KEY);
+
+  hmac.update(method);
+  hmac.update(space);
+  hmac.update(url2);
+  hmac.update(newLine);
+  hmac.update(date);
+  hmac.update(newLine);
+  hmac.update(NCP_ACCESS_KEY);
+
+  const hash = hmac.finalize();
+  const signature = hash.toString(cryptoJs.enc.Base64);
 
   try {
     const { creator } = await Letter.findById(id).lean().exec();
@@ -60,9 +83,29 @@ const putReply = async (req, res, next) => {
       .lean()
       .exec();
 
-    const info = { message: content, phoneNumber };
-
-    sendSMS(info);
+    await axios({
+      method: "POST",
+      json: true,
+      url: URL,
+      headers: {
+        "Content-Type": "application/json",
+        "x-ncp-iam-access-key": NCP_ACCESS_KEY,
+        "x-ncp-apigw-timestamp": date,
+        "x-ncp-apigw-signature-v2": signature,
+      },
+      data: {
+        type: "SMS",
+        contentType: "COMM",
+        countryCode: "82",
+        from: CALLER_ID,
+        content: `[무지개편지]\n${content}`,
+        messages: [
+          {
+            to: `${phoneNumber}`,
+          },
+        ],
+      },
+    });
 
     res.json({
       status: 200,

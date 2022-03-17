@@ -1,20 +1,41 @@
+const axios = require("axios");
 const bcrypt = require("bcrypt");
 const cache = require("memory-cache");
+const cryptoJs = require("crypto-js");
 
 require("../models/Angel");
 const User = require("../models/User");
 const generateToken = require("../utils/tokenGenerator");
-const sendSMS = require("../utils/sendSMS");
-const { RESPONSE, ERROR_RESPONSE } = require("../constant");
+const { RESPONSE, ERROR_RESPONSE, URL } = require("../constant");
 
 const postCertification = async (req, res, next) => {
   const { phoneNumber } = req.body;
+  const { NCP_ACCESS_KEY, NCP_SECRET_KEY, NCP_SERVICE_ID, CALLER_ID } =
+    process.env;
+
+  const date = Date.now().toString();
+  const method = "POST";
+  const space = " ";
+  const newLine = "\n";
+  const url2 = `/sms/v2/services/${NCP_SERVICE_ID}/messages`;
+  const hmac = cryptoJs.algo.HMAC.create(cryptoJs.algo.SHA256, NCP_SECRET_KEY);
 
   const certificationCode =
     Math.floor(Math.random() * (999999 - 100000)) + 100000;
 
   cache.del(phoneNumber);
   cache.put(phoneNumber, certificationCode.toString(), 180000);
+
+  hmac.update(method);
+  hmac.update(space);
+  hmac.update(url2);
+  hmac.update(newLine);
+  hmac.update(date);
+  hmac.update(newLine);
+  hmac.update(NCP_ACCESS_KEY);
+
+  const hash = hmac.finalize();
+  const signature = hash.toString(cryptoJs.enc.Base64);
 
   try {
     const existedUser = await User.findOne({ phoneNumber }).lean().exec();
@@ -28,12 +49,29 @@ const postCertification = async (req, res, next) => {
       return;
     }
 
-    const info = {
-      message: `인증번호 [${certificationCode}]를 입력해주세요.`,
-      phoneNumber,
-    };
-
-    sendSMS(info);
+    await axios({
+      method: "POST",
+      json: true,
+      url: URL,
+      headers: {
+        "Content-Type": "application/json",
+        "x-ncp-iam-access-key": NCP_ACCESS_KEY,
+        "x-ncp-apigw-timestamp": date,
+        "x-ncp-apigw-signature-v2": signature,
+      },
+      data: {
+        type: "SMS",
+        contentType: "COMM",
+        countryCode: "82",
+        from: CALLER_ID,
+        content: `[무지개편지]\n인증번호 [${certificationCode}]를 입력해주세요.`,
+        messages: [
+          {
+            to: `${phoneNumber}`,
+          },
+        ],
+      },
+    });
 
     res.json({
       status: 201,
